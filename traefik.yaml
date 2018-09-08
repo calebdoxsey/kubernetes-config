@@ -1,0 +1,77 @@
+kind: DaemonSet
+apiVersion: extensions/v1beta1
+metadata:
+  name: traefik
+  labels:
+    name: traefik
+    app: traefik
+spec:
+  template:
+    metadata:
+      labels:
+        name: traefik
+        app: traefik
+    spec:
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      terminationGracePeriodSeconds: 0
+      containers:
+      - image: traefik:v1.7
+        name: traefik
+        ports:
+        - name: http
+          containerPort: 80
+          hostPort: 80
+        - name: https
+          containerPort: 443
+          hostPort: 443
+        args:
+        - --configfile=/etc/traefik/traefik.toml
+        volumeMounts:
+        - mountPath: "/etc/traefik"
+          name: "config"
+      volumes:
+        - name: config
+          configMap:
+            name: traefik-conf
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: traefik-conf
+data:
+  traefik.toml: |
+    defaultEntryPoints = ["http"]
+    logLevel = "INFO"
+
+    [accessLog]
+
+    [entryPoints]
+      [entryPoints.http]
+      address = ":80"
+
+    [file]
+
+    [backends]
+      [backends.badgerodon-www]
+        [backends.badgerodon-www.servers]
+          [backends.badgerodon-www.servers.server0]
+          url = "http://badgerodon-www.default.svc.cluster.local:9001"
+          weight = 1
+
+      [backends.doxsey-www]
+        [backends.doxsey-www.servers]
+          [backends.doxsey-www.servers.server0]
+          url = "http://doxsey-www.default.svc.cluster.local:9002"
+          weight = 1
+
+    [frontends]
+      [frontends.badgerodon-www]
+      backend = "badgerodon-www"
+        [frontends.badgerodon-www.routes.route1]
+        rule = "HostRegexp:badgerodon.com,{subdomain:.+}.badgerodon.com"
+
+      [frontends.doxsey-www]
+      backend = "doxsey-www"
+        [frontends.doxsey-www.routes.route1]
+        rule = "HostRegexp:doxsey.net,{subdomain:.+}.doxsey.net"

@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: badgerodon-www
+  labels:
+    app: badgerodon-www
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: badgerodon-www
+  template:
+    metadata:
+      labels:
+        app: badgerodon-www
+    spec:
+      containers:
+      - name: badgerodon-www
+        image: gcr.io/doxsey-1/badgerodon-www:latest
+        ports:
+        - containerPort: 9001
+
+---
+
+kind: Service
+apiVersion: v1
+metadata:
+  name: badgerodon-www
+spec:
+  selector:
+    app: badgerodon-www
+  ports:
+  - protocol: TCP
+    port: 9001
+    targetPort: 9001

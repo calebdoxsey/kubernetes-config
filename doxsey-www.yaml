@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: doxsey-www
+  labels:
+    app: doxsey-www
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: doxsey-www
+  template:
+    metadata:
+      labels:
+        app: doxsey-www
+    spec:
+      containers:
+      - name: doxsey-www
+        image: gcr.io/doxsey-1/doxsey-www:latest
+        ports:
+        - containerPort: 9002
+
+---
+
+kind: Service
+apiVersion: v1
+metadata:
+  name: doxsey-www
+spec:
+  selector:
+    app: doxsey-www
+  ports:
+  - protocol: TCP
+    port: 9002
+    targetPort: 9002
