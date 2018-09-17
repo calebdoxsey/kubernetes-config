@@ -1,77 +1,98 @@
-kind: DaemonSet
-apiVersion: extensions/v1beta1
-metadata:
-  name: traefik
-  labels:
-    name: traefik
-    app: traefik
-spec:
-  template:
-    metadata:
-      labels:
-        name: traefik
-        app: traefik
-    spec:
-      hostNetwork: true
-      dnsPolicy: ClusterFirstWithHostNet
-      terminationGracePeriodSeconds: 0
-      containers:
-      - image: traefik:v1.7
-        name: traefik
-        ports:
-        - name: http
-          containerPort: 80
-          hostPort: 80
-        - name: https
-          containerPort: 443
-          hostPort: 443
-        args:
-        - --configfile=/etc/traefik/traefik.toml
-        volumeMounts:
-        - mountPath: "/etc/traefik"
-          name: "config"
-      volumes:
-        - name: config
-          configMap:
-            name: traefik-conf
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: traefik-conf
-data:
-  traefik.toml: |
-    defaultEntryPoints = ["http"]
-    logLevel = "INFO"
+# kind: DaemonSet
+# apiVersion: extensions/v1beta1
+# metadata:
+#   name: traefik
+#   labels:
+#     name: traefik
+#     app: traefik
+# spec:
+#   updateStrategy:
+#     type: RollingUpdate
+#     rollingUpdate:
+#       maxUnavailable: 1
+#   template:
+#     metadata:
+#       labels:
+#         name: traefik
+#         app: traefik
+#       annotations:
+#         config-version: "2"
+#     spec:
+#       hostNetwork: true
+#       dnsPolicy: ClusterFirstWithHostNet
+#       terminationGracePeriodSeconds: 0
+#       containers:
+#       - image: traefik:v1.7
+#         name: traefik
+#         resources:
+#           limits:
+#             memory: "100Mi"
+#             cpu: "150m"
+#         ports:
+#         - name: http
+#           containerPort: 80
+#           hostPort: 80
+#         - name: https
+#           containerPort: 443
+#           hostPort: 443
+#         args:
+#         - --configfile=/etc/traefik/traefik.toml
+#         volumeMounts:
+#         - mountPath: "/etc/traefik"
+#           name: "config"
+#       volumes:
+#         - name: config
+#           configMap:
+#             name: traefik-conf
+# ---
+# apiVersion: v1
+# kind: ConfigMap
+# metadata:
+#   name: traefik-conf
+# data:
+#   traefik.toml: |
+#     defaultEntryPoints = ["http"]
+#     logLevel = "INFO"
 
-    [accessLog]
+#     [accessLog]
 
-    [entryPoints]
-      [entryPoints.http]
-      address = ":80"
+#     [entryPoints]
+#       [entryPoints.http]
+#       address = ":80"
 
-    [file]
+#     [file]
 
-    [backends]
-      [backends.badgerodon-www]
-        [backends.badgerodon-www.servers]
-          [backends.badgerodon-www.servers.server0]
-          url = "http://badgerodon-www.default.svc.cluster.local:9001"
-          weight = 1
+#     [backends]
+#       [backends.badgerodon-www]
+#         [backends.badgerodon-www.servers]
+#           [backends.badgerodon-www.servers.server0]
+#           url = "http://badgerodon-www.default.svc.cluster.local:9001"
+#           weight = 1
 
-      [backends.doxsey-www]
-        [backends.doxsey-www.servers]
-          [backends.doxsey-www.servers.server0]
-          url = "http://doxsey-www.default.svc.cluster.local:9002"
-          weight = 1
+#       [backends.doxsey-www]
+#         [backends.doxsey-www.servers]
+#           [backends.doxsey-www.servers.server0]
+#           url = "http://doxsey-www.default.svc.cluster.local:9002"
+#           weight = 1
 
-    [frontends]
-      [frontends.badgerodon-www]
-      backend = "badgerodon-www"
-        [frontends.badgerodon-www.routes.route1]
-        rule = "HostRegexp:badgerodon.com,{subdomain:.+}.badgerodon.com"
+#       [backends.julia-www-example]
+#         [backends.julia-www-example.servers]
+#           [backends.julia-www-example.servers.server0]
+#           url = "http://julia-www-example.default.svc.cluster.local:9002"
+#           weight = 1
 
-      [frontends.doxsey-www]
-      backend = "doxsey-www"
-        [frontends.doxsey-www.routes.route1]
-        rule = "HostRegexp:doxsey.net,{subdomain:.+}.doxsey.net"
+#     [frontends]
+#       [frontends.julia-www-example]
+#       backend = "julia-www-example"
+#         [frontends.julia-www-example.routes.route1]
+#         rule = "HostRegexp:julia-www-example.badgerodon.com"
+
+#       [frontends.badgerodon-www]
+#       backend = "badgerodon-www"
+#         [frontends.badgerodon-www.routes.route1]
+#         rule = "HostRegexp:badgerodon.com,{subdomain:.+}.badgerodon.com"
+
+#       [frontends.doxsey-www]
+#       backend = "doxsey-www"
+#         [frontends.doxsey-www.routes.route1]
+#         rule = "HostRegexp:doxsey.net,{subdomain:.+}.doxsey.net"

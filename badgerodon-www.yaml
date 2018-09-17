@@ -14,11 +14,16 @@ spec:
       labels:
         app: badgerodon-www
     spec:
+      terminationGracePeriodSeconds: 0
       containers:
       - name: badgerodon-www
         image: gcr.io/doxsey-1/badgerodon-www:latest
         ports:
         - containerPort: 9001
+        resources:
+          limits:
+            memory: "50Mi"
+            cpu: "100m"
 
 ---
 

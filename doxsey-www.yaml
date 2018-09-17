@@ -14,11 +14,16 @@ spec:
       labels:
         app: doxsey-www
     spec:
+      terminationGracePeriodSeconds: 0
       containers:
       - name: doxsey-www
         image: gcr.io/doxsey-1/doxsey-www:latest
         ports:
         - containerPort: 9002
+        resources:
+          limits:
+            memory: "50Mi"
+            cpu: "100m"
 
 ---
 

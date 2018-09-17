@@ -1,0 +1,86 @@
+kind: DaemonSet
+apiVersion: extensions/v1beta1
+metadata:
+  name: nginx
+  labels:
+    name: nginx
+    app: nginx
+spec:
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        name: nginx
+        app: nginx
+      annotations:
+        config-version: "8"
+    spec:
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      terminationGracePeriodSeconds: 0
+      containers:
+      - image: nginx:1.15.3-alpine
+        name: nginx
+        resources:
+          limits:
+            cpu: "100m"
+        ports:
+        - name: http
+          containerPort: 80
+          hostPort: 80
+        volumeMounts:
+        - mountPath: "/etc/nginx"
+          name: "config"
+      volumes:
+        - name: config
+          configMap:
+            name: nginx-conf
+
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-conf
+data:
+  nginx.conf: |
+    worker_processes 1;
+    error_log /dev/stdout info;
+
+    events {
+      worker_connections 10;
+    }
+
+    http {
+      access_log /dev/stdout;
+
+      server {
+        listen 80;
+        server_name julia-www-example.badgerodon.com;
+
+        location / {
+          proxy_pass http://julia-www-example.default.svc.cluster.local:8081;
+        }
+      }
+
+      server {
+        listen 80;
+        server_name *.badgerodon.com;
+
+        location / {
+          proxy_pass http://badgerodon-www.default.svc.cluster.local:9001;
+        }
+      }
+
+      server {
+        listen 80;
+        server_name *.doxsey.net;
+
+        location / {
+          proxy_pass http://doxsey-www.default.svc.cluster.local:9002;
+        }
+      }
+    }
