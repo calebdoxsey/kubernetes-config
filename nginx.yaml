@@ -59,15 +59,6 @@ data:
 
       server {
         listen 80;
-        server_name julia-www-example.badgerodon.com;
-
-        location / {
-          proxy_pass http://julia-www-example.default.svc.cluster.local:8081;
-        }
-      }
-
-      server {
-        listen 80;
         server_name *.badgerodon.com;
 
         location / {
