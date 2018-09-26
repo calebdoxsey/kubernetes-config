@@ -32,12 +32,17 @@ spec:
           containerPort: 80
           hostPort: 80
         volumeMounts:
-        - mountPath: "/etc/nginx"
-          name: "config"
+        - name: "config"
+          mountPath: "/etc/nginx"
+        - name: badgerodon-com-tls
+          mountPath: "/etc/tls/badgerodon-com"
       volumes:
-        - name: config
-          configMap:
-            name: nginx-conf
+      - name: config
+        configMap:
+          name: nginx-conf
+      - name: badgerodon-com-tls
+        secret:
+          secretName: badgerodon-com-tls
 
 ---
 
@@ -59,7 +64,10 @@ data:
 
       server {
         listen 80;
+        listen 443 ssl;
         server_name *.badgerodon.com;
+        ssl_certificate     /etc/tls/badgerodon-com/tls.crt;
+        ssl_certificate_key /etc/tls/badgerodon-com/tls.key;
 
         location / {
           proxy_pass http://badgerodon-www.default.svc.cluster.local:9001;

@@ -41,7 +41,7 @@ spec:
       labels:
         app: kubernetes-cloudflare-sync
       annotations:
-        config-version: "1"
+        config-version: "2"
     spec:
       serviceAccountName: kubernetes-cloudflare-sync
       terminationGracePeriodSeconds: 0

@@ -38,3 +38,26 @@ spec:
   - protocol: TCP
     port: 9001
     targetPort: 9001
+
+
+---
+
+apiVersion: certmanager.k8s.io/v1alpha1
+kind: Certificate
+metadata:
+  name: badgerodon-com
+  namespace: default
+spec:
+  secretName: badgerodon-com-tls
+  issuerRef:
+    name: letsencrypt-prod
+  commonName: '*.badgerodon.com'
+  dnsNames:
+  - badgerodon.com
+  acme:
+    config:
+    - dns01:
+        provider: cf-dns
+      domains:
+      - '*.badgerodon.com'
+      - badgerodon.com
