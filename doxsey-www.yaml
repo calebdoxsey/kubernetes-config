@@ -38,3 +38,25 @@ spec:
   - protocol: TCP
     port: 9002
     targetPort: 9002
+
+---
+
+apiVersion: certmanager.k8s.io/v1alpha1
+kind: Certificate
+metadata:
+  name: doxsey-net
+  namespace: default
+spec:
+  secretName: doxsey-net-tls
+  issuerRef:
+    name: letsencrypt-prod
+  commonName: '*.doxsey.net'
+  dnsNames:
+  - doxsey.net
+  acme:
+    config:
+    - dns01:
+        provider: cf-dns
+      domains:
+      - '*.doxsey.net'
+      - doxsey.net

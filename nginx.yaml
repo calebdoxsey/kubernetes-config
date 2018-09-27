@@ -36,6 +36,8 @@ spec:
           mountPath: "/etc/nginx"
         - name: badgerodon-com-tls
           mountPath: "/etc/tls/badgerodon-com"
+        - name: doxsey-net-tls
+          mountPath: "/etc/tls/doxsey-net"
       volumes:
       - name: config
         configMap:
@@ -43,6 +45,9 @@ spec:
       - name: badgerodon-com-tls
         secret:
           secretName: badgerodon-com-tls
+      - name: doxsey-net-tls
+        secret:
+          secretName: doxsey-net-tls
 
 ---
 
@@ -76,7 +81,10 @@ data:
 
       server {
         listen 80;
+        listen 443 ssl;
         server_name *.doxsey.net;
+        ssl_certificate     /etc/tls/doxsey-net/tls.crt;
+        ssl_certificate_key /etc/tls/doxsey-net/tls.key;
 
         location / {
           proxy_pass http://doxsey-www.default.svc.cluster.local:9002;
