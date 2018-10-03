@@ -17,7 +17,36 @@ spec:
       terminationGracePeriodSeconds: 0
       containers:
       - name: doxsey-www
-        image: gcr.io/doxsey-1/doxsey-www:latest
+        image: gcr.io/doxsey-1/doxsey-www:20181003t1924
+        ports:
+        - containerPort: 9002
+        resources:
+          limits:
+            memory: "50Mi"
+            cpu: "100m"
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: doxsey-www-next
+  labels:
+    app: doxsey-www-next
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: doxsey-www-next
+  template:
+    metadata:
+      labels:
+        app: doxsey-www-next
+    spec:
+      terminationGracePeriodSeconds: 0
+      containers:
+      - name: doxsey-www
+        image: gcr.io/doxsey-1/doxsey-www:20181003t1924
         ports:
         - containerPort: 9002
         resources:
@@ -34,6 +63,21 @@ metadata:
 spec:
   selector:
     app: doxsey-www
+  ports:
+  - protocol: TCP
+    port: 9002
+    targetPort: 9002
+
+---
+
+
+kind: Service
+apiVersion: v1
+metadata:
+  name: doxsey-www-next
+spec:
+  selector:
+    app: doxsey-www-next
   ports:
   - protocol: TCP
     port: 9002

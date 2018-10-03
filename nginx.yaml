@@ -10,13 +10,16 @@ spec:
     type: RollingUpdate
     rollingUpdate:
       maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: nginx
   template:
     metadata:
       labels:
         name: nginx
         app: nginx
       annotations:
-        config-version: "8"
+        config-version: "9"
     spec:
       hostNetwork: true
       dnsPolicy: ClusterFirstWithHostNet
@@ -88,6 +91,18 @@ data:
 
         location / {
           proxy_pass http://doxsey-www.default.svc.cluster.local:9002;
+        }
+      }
+
+      server {
+        listen 80;
+        listen 443 ssl;
+        server_name next.doxsey.net;
+        ssl_certificate     /etc/tls/doxsey-net/tls.crt;
+        ssl_certificate_key /etc/tls/doxsey-net/tls.key;
+
+        location / {
+          proxy_pass http://doxsey-www-next.default.svc.cluster.local:9002;
         }
       }
     }
