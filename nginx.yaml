@@ -41,6 +41,8 @@ spec:
           mountPath: "/etc/tls/badgerodon-com"
         - name: doxsey-net-tls
           mountPath: "/etc/tls/doxsey-net"
+        - name: rtctunnel-com-tls
+          mountPath: "/etc/tls/rtctunnel-com"
       volumes:
       - name: config
         configMap:
@@ -51,6 +53,9 @@ spec:
       - name: doxsey-net-tls
         secret:
           secretName: doxsey-net-tls
+      - name: rtctunnel-com-tls
+        secret:
+          secretName: rtctunnel-com-tls
 
 ---
 
@@ -103,6 +108,18 @@ data:
 
         location / {
           proxy_pass http://doxsey-www-next.default.svc.cluster.local:9002;
+        }
+      }
+
+      server {
+        listen 80;
+        listen 443 ssl;
+        server_name operator.rtctunnel.com;
+        ssl_certificate     /etc/tls/rtctunnel-com/tls.crt;
+        ssl_certificate_key /etc/tls/rtctunnel-com/tls.key;
+
+        location / {
+          proxy_pass http://rtctunnel-operator.default.svc.cluster.local:9100;
         }
       }
     }

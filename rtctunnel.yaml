@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rtctunnel-operator
+  labels:
+    app: rtctunnel-operator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rtctunnel-operator
+  template:
+    metadata:
+      labels:
+        app: rtctunnel-operator
+    spec:
+      terminationGracePeriodSeconds: 0
+      containers:
+      - name: rtctunnel-operator
+        image: gcr.io/doxsey-1/rtctunnel-operator:latest
+        ports:
+        - containerPort: 9100
+        resources:
+          limits:
+            memory: "50Mi"
+            cpu: "100m"
+
+---
+
+kind: Service
+apiVersion: v1
+metadata:
+  name: rtctunnel-operator
+spec:
+  selector:
+    app: rtctunnel-operator
+  ports:
+  - protocol: TCP
+    port: 9100
+    targetPort: 9100
+
+
+---
+
+apiVersion: certmanager.k8s.io/v1alpha1
+kind: Certificate
+metadata:
+  name: rtctunnel-com
+  namespace: default
+spec:
+  secretName: rtctunnel-com-tls
+  issuerRef:
+    name: letsencrypt-prod
+  commonName: '*.rtctunnel.com'
+  dnsNames:
+  - rtctunnel.com
+  acme:
+    config:
+    - dns01:
+        provider: cloud-dns
+      domains:
+      - '*.rtctunnel.com'
+      - rtctunnel.com

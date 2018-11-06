@@ -24,6 +24,12 @@ spec:
             apiKeySecretRef:
               name: cloudflare
               key: api-key
+        - name: cloud-dns
+          clouddns:
+            project: doxsey-1
+            serviceAccountSecretRef:
+              name: clouddns
+              key: service-account.json
 
 ---
 
@@ -39,7 +45,7 @@ spec:
 
     # Name of a secret used to store the ACME account private key
     privateKeySecretRef:
-      name: letsencrypt-staging
+      name: letsencrypt-prod
 
     # ACME DNS-01 provider configurations
     dns01:
@@ -53,3 +59,9 @@ spec:
             apiKeySecretRef:
               name: cloudflare
               key: api-key
+        - name: cloud-dns
+          clouddns:
+            project: doxsey-1
+            serviceAccountSecretRef:
+              name: clouddns
+              key: service-account.json
