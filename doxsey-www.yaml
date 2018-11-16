@@ -16,17 +16,16 @@ spec:
     spec:
       terminationGracePeriodSeconds: 0
       containers:
-      - name: doxsey-www
-        image: gcr.io/doxsey-1/doxsey-www:20181003t1924
-        ports:
-        - containerPort: 9002
-        resources:
-          limits:
-            memory: "50Mi"
-            cpu: "100m"
+        - name: doxsey-www
+          image: gcr.io/doxsey-1/doxsey-www:20181116t0842
+          ports:
+            - containerPort: 9002
+          resources:
+            limits:
+              memory: "50Mi"
+              cpu: "100m"
 
 ---
-
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -45,17 +44,16 @@ spec:
     spec:
       terminationGracePeriodSeconds: 0
       containers:
-      - name: doxsey-www
-        image: gcr.io/doxsey-1/doxsey-www:20181003t1924
-        ports:
-        - containerPort: 9002
-        resources:
-          limits:
-            memory: "50Mi"
-            cpu: "100m"
+        - name: doxsey-www
+          image: gcr.io/doxsey-1/doxsey-www:20181116t0842
+          ports:
+            - containerPort: 9002
+          resources:
+            limits:
+              memory: "50Mi"
+              cpu: "100m"
 
 ---
-
 kind: Service
 apiVersion: v1
 metadata:
@@ -64,13 +62,11 @@ spec:
   selector:
     app: doxsey-www
   ports:
-  - protocol: TCP
-    port: 9002
-    targetPort: 9002
+    - protocol: TCP
+      port: 9002
+      targetPort: 9002
 
 ---
-
-
 kind: Service
 apiVersion: v1
 metadata:
@@ -79,12 +75,11 @@ spec:
   selector:
     app: doxsey-www-next
   ports:
-  - protocol: TCP
-    port: 9002
-    targetPort: 9002
+    - protocol: TCP
+      port: 9002
+      targetPort: 9002
 
 ---
-
 apiVersion: certmanager.k8s.io/v1alpha1
 kind: Certificate
 metadata:
@@ -94,13 +89,13 @@ spec:
   secretName: doxsey-net-tls
   issuerRef:
     name: letsencrypt-prod
-  commonName: '*.doxsey.net'
+  commonName: "*.doxsey.net"
   dnsNames:
-  - doxsey.net
+    - doxsey.net
   acme:
     config:
-    - dns01:
-        provider: cf-dns
-      domains:
-      - '*.doxsey.net'
-      - doxsey.net
+      - dns01:
+          provider: cf-dns
+        domains:
+          - "*.doxsey.net"
+          - doxsey.net
