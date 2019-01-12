@@ -17,7 +17,7 @@ spec:
       terminationGracePeriodSeconds: 0
       containers:
         - name: doxsey-www
-          image: gcr.io/doxsey-1/doxsey-www:20181116t0842
+          image: gcr.io/doxsey-1/doxsey-www:20190112t1438
           ports:
             - containerPort: 9002
           resources:
@@ -45,7 +45,7 @@ spec:
       terminationGracePeriodSeconds: 0
       containers:
         - name: doxsey-www
-          image: gcr.io/doxsey-1/doxsey-www:20181116t0842
+          image: gcr.io/doxsey-1/doxsey-www:20190112t1438
           ports:
             - containerPort: 9002
           resources:
