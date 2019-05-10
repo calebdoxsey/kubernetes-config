@@ -17,7 +17,7 @@ spec:
       terminationGracePeriodSeconds: 0
       containers:
       - name: rtctunnel-operator
-        image: gcr.io/doxsey-1/rtctunnel-operator:latest
+        image: quay.io/rtctunnel/operator:v1.0.0
         ports:
         - containerPort: 9100
         resources:
