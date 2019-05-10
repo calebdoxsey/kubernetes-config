@@ -47,7 +47,7 @@ spec:
       terminationGracePeriodSeconds: 0
       containers:
       - name: kubernetes-cloudflare-sync
-        image: gcr.io/doxsey-1/kubernetes-cloudflare-sync
+        image: quay.io/calebdoxsey/kubernetes-cloudflare-sync:v0.2.0
         args:
         - --dns-name=kubernetes.doxsey.net
         env:
