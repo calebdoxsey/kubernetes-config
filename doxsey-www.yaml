@@ -17,7 +17,7 @@ spec:
       terminationGracePeriodSeconds: 0
       containers:
         - name: doxsey-www
-          image: quay.io/calebdoxsey/www:v1.1.0
+          image: quay.io/calebdoxsey/www:v1.3.1
           ports:
             - containerPort: 9002
           resources:
@@ -45,7 +45,7 @@ spec:
       terminationGracePeriodSeconds: 0
       containers:
         - name: doxsey-www
-          image: quay.io/calebdoxsey/www:v1.1.0
+          image: quay.io/calebdoxsey/www:v1.3.1
           ports:
             - containerPort: 9002
           resources:
