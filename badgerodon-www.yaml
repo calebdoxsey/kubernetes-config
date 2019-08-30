@@ -17,7 +17,10 @@ spec:
       terminationGracePeriodSeconds: 0
       containers:
         - name: badgerodon-www
-          image: gcr.io/doxsey-1/badgerodon-www:latest
+          image: quay.io/badgerodon/www:v1.1.0
+          env:
+            - name: PORT
+              value: "9001"
           ports:
             - containerPort: 9001
           resources:
@@ -39,6 +42,34 @@ spec:
     - protocol: TCP
       port: 9001
       targetPort: 9001
+
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  namespace: default
+  name: badgerodon-www
+spec:
+  tls:
+    - hosts:
+        - "badgerodon.com"
+        - "*.badgerodon.com"
+      secretName: badgerodon-com-tls
+  rules:
+    - host: www.badgerodon.com
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: badgerodon-www
+              servicePort: 9001
+    - host: badgerodon.com
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: badgerodon-www
+              servicePort: 9001
 
 ---
 apiVersion: certmanager.k8s.io/v1alpha1

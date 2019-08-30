@@ -93,17 +93,21 @@ kind: Ingress
 metadata:
   namespace: default
   name: doxsey-www
-  annotations:
-    ingress.kubernetes.io/rewrite-target: /
-    kubernetes.io/ingress.class: "nginx"
-    ingress.kubernetes.io/ssl-redirect: "false"
 spec:
   tls:
     - hosts:
+        - "doxsey.net"
         - "*.doxsey.net"
       secretName: doxsey-net-tls
   rules:
     - host: www.doxsey.net
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: doxsey-www
+              servicePort: 9002
+    - host: doxsey.net
       http:
         paths:
           - path: /
