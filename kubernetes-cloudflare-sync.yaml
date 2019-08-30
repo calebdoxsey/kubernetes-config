@@ -1,6 +1,7 @@
 apiVersion: v1
 kind: ServiceAccount
 metadata:
+  namespace: default
   name: kubernetes-cloudflare-sync
 ---
 apiVersion: rbac.authorization.k8s.io/v1beta1
@@ -8,9 +9,9 @@ kind: ClusterRole
 metadata:
   name: kubernetes-cloudflare-sync
 rules:
-- apiGroups: [""]
-  resources: ["nodes"]
-  verbs: ["list", "watch"]
+  - apiGroups: [""]
+    resources: ["nodes"]
+    verbs: ["list", "watch"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRoleBinding
@@ -21,13 +22,14 @@ roleRef:
   kind: ClusterRole
   name: kubernetes-cloudflare-sync
 subjects:
-- kind: ServiceAccount
-  name: kubernetes-cloudflare-sync
-  namespace: default
+  - kind: ServiceAccount
+    name: kubernetes-cloudflare-sync
+    namespace: default
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  namespace: default
   name: kubernetes-cloudflare-sync
   labels:
     app: kubernetes-cloudflare-sync
@@ -40,28 +42,26 @@ spec:
     metadata:
       labels:
         app: kubernetes-cloudflare-sync
-      annotations:
-        config-version: "2"
     spec:
       serviceAccountName: kubernetes-cloudflare-sync
       terminationGracePeriodSeconds: 0
       containers:
-      - name: kubernetes-cloudflare-sync
-        image: quay.io/calebdoxsey/kubernetes-cloudflare-sync:v0.2.0
-        args:
-        - --dns-name=kubernetes.doxsey.net
-        env:
-        - name: CF_API_KEY
-          valueFrom:
-            secretKeyRef:
-              name: cloudflare
-              key: api-key
-        - name: CF_API_EMAIL
-          valueFrom:
-            secretKeyRef:
-              name: cloudflare
-              key: email
-        resources:
-          limits:
-            memory: "50Mi"
-            cpu: "100m"
+        - name: kubernetes-cloudflare-sync
+          image: quay.io/calebdoxsey/kubernetes-cloudflare-sync:v0.2.0
+          args:
+            - --dns-name=do.doxsey.net
+          env:
+            - name: CF_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: cloudflare
+                  key: api-key
+            - name: CF_API_EMAIL
+              valueFrom:
+                secretKeyRef:
+                  name: cloudflare
+                  key: email
+          resources:
+            limits:
+              memory: "50Mi"
+              cpu: "100m"
