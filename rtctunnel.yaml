@@ -56,7 +56,28 @@ spec:
   acme:
     config:
       - dns01:
-          provider: cloud-dns
+          provider: digitalocean-dns
         domains:
           - "*.rtctunnel.com"
           - rtctunnel.com
+
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  namespace: default
+  name: rtctunnel-operator
+spec:
+  tls:
+    - hosts:
+        - "rtctunnel.com"
+        - "*.rtctunnel.com"
+      secretName: rtctunnel-com-tls
+  rules:
+    - host: operator.rtctunnel.com
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: rtctunnel-operator
+              servicePort: 9100

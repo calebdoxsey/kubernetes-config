@@ -14,7 +14,6 @@ spec:
 
     # ACME DNS-01 provider configurations
     dns01:
-
       # Here we define a list of DNS-01 providers that can solve DNS challenges
       providers:
         - name: cf-dns
@@ -32,7 +31,6 @@ spec:
               key: service-account.json
 
 ---
-
 apiVersion: certmanager.k8s.io/v1alpha1
 kind: Issuer
 metadata:
@@ -49,7 +47,6 @@ spec:
 
     # ACME DNS-01 provider configurations
     dns01:
-
       # Here we define a list of DNS-01 providers that can solve DNS challenges
       providers:
         - name: cf-dns
@@ -65,3 +62,8 @@ spec:
             serviceAccountSecretRef:
               name: clouddns
               key: service-account.json
+        - name: digitalocean-dns
+          digitalocean:
+            tokenSecretRef:
+              name: digitalocean-dns
+              key: access-token
