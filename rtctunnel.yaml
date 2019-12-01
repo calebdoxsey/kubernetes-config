@@ -17,7 +17,7 @@ spec:
       terminationGracePeriodSeconds: 0
       containers:
         - name: rtctunnel-operator
-          image: quay.io/rtctunnel/operator:v1.0.0
+          image: quay.io/rtctunnel/operator:v1.1.0
           ports:
             - containerPort: 9100
           resources:
