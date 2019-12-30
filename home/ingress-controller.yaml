@@ -1,0 +1,86 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: kubernetes-simple-ingress-controller
+  namespace: default
+  labels:
+    app: ingress-controller
+
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRole
+metadata:
+  name: ingress-controller
+  labels:
+    app: ingress-controller
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - secrets
+      - services
+    verbs:
+      - list
+      - get
+      - watch
+  - apiGroups:
+      - "extensions"
+      - "networking.k8s.io"
+    resources:
+      - ingresses
+    verbs:
+      - get
+      - list
+      - watch
+
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: ingress-controller-binding
+  labels:
+    app: ingress-controller
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: ingress-controller
+subjects:
+  - kind: ServiceAccount
+    name: kubernetes-simple-ingress-controller
+    namespace: default
+
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: kubernetes-simple-ingress-controller
+  namespace: default
+  labels:
+    app: ingress-controller
+spec:
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: ingress-controller
+  template:
+    metadata:
+      labels:
+        app: ingress-controller
+    spec:
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      serviceAccountName: kubernetes-simple-ingress-controller
+      containers:
+        - name: kubernetes-simple-ingress-controller
+          image: quay.io/calebdoxsey/kubernetes-simple-ingress-controller:v0.1.0
+          ports:
+            - name: http
+              containerPort: 80
+            - name: https
+              containerPort: 443
+---
+

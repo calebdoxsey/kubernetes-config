@@ -17,7 +17,7 @@ spec:
       terminationGracePeriodSeconds: 0
       containers:
         - name: rtctunnel-operator
-          image: quay.io/rtctunnel/operator:v1.1.0
+          image: quay.io/rtctunnel/operator:v1.2.0
           ports:
             - containerPort: 9100
           resources:
@@ -41,7 +41,7 @@ spec:
       targetPort: 9100
 
 ---
-apiVersion: certmanager.k8s.io/v1alpha1
+apiVersion: cert-manager.io/v1alpha2
 kind: Certificate
 metadata:
   name: rtctunnel-com
@@ -50,16 +50,12 @@ spec:
   secretName: rtctunnel-com-tls
   issuerRef:
     name: letsencrypt-prod
-  commonName: "*.rtctunnel.com"
+  commonName: operator.rtctunnel.com
   dnsNames:
-    - rtctunnel.com
-  acme:
-    config:
-      - dns01:
-          provider: digitalocean-dns
-        domains:
-          - "*.rtctunnel.com"
-          - rtctunnel.com
+    - operator.rtctunnel.com
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
 
 ---
 apiVersion: extensions/v1beta1
@@ -70,8 +66,7 @@ metadata:
 spec:
   tls:
     - hosts:
-        - "rtctunnel.com"
-        - "*.rtctunnel.com"
+        - operator.rtctunnel.com
       secretName: rtctunnel-com-tls
   rules:
     - host: operator.rtctunnel.com
