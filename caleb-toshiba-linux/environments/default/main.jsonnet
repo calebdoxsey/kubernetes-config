@@ -9,6 +9,93 @@
     },
   },
 
+  ddclient: {
+    configMap: {
+      apiVersion: 'v1',
+      kind: 'ConfigMap',
+      metadata: {
+        name: 'ddclient-templates',
+      },
+      data: {
+        'ddclient.conf': |||
+          ##
+          ## OpenDNS.com account-configuration
+          ##
+          protocol=dyndns2
+          use=web, web=myip.dnsomatic.com
+          ssl=yes
+          server=updates.opendns.com
+          login=$OPENDNS_USERNAME
+          password='$OPENDNS_PASSWORD'
+          home
+        |||,
+      },
+    },
+    deployment: {
+      apiVersion: 'apps/v1',
+      kind: 'Deployment',
+      metadata: {
+        name: 'ddclient',
+      },
+      spec: {
+        selector: {
+          matchLabels: {
+            name: 'ddclient',
+          },
+        },
+        template: {
+          metadata: {
+            labels: {
+              name: 'ddclient',
+            },
+          },
+          spec: {
+            initContainers: [{
+              name: 'ddclient-init',
+              image: 'dibi/envsubst:latest',
+              env: [
+                { name: 'OPENDNS_USERNAME', valueFrom: { secretKeyRef: { name: 'opendns', key: 'username' } } },
+                { name: 'OPENDNS_PASSWORD', valueFrom: { secretKeyRef: { name: 'opendns', key: 'password' } } },
+              ],
+              volumeMounts: [
+                {
+                  name: 'ddclient-templates',
+                  mountPath: '/workdir',
+                },
+                {
+                  name: 'ddclient-config',
+                  mountPath: '/processed',
+                },
+              ],
+            }],
+            containers: [{
+              name: 'ddclient',
+              image: 'linuxserver/ddclient:latest',
+              volumeMounts: [
+                {
+                  name: 'ddclient-config',
+                  mountPath: '/config',
+                },
+              ],
+            }],
+            volumes: [
+              {
+                name: 'ddclient-templates',
+                configMap: {
+                  name: 'ddclient-templates',
+                },
+              },
+              {
+                name: 'ddclient-config',
+                emptyDir: {},
+              },
+            ],
+          },
+        },
+      },
+    },
+  },
+
   redis: {
     deployment: {
       apiVersion: 'apps/v1',

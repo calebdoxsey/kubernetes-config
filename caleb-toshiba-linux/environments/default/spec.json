@@ -8,6 +8,7 @@
     "apiServer": "https://caleb-toshiba-linux.doxsey.net:6443",
     "namespace": "default",
     "resourceDefaults": {},
-    "expectVersions": {}
+    "expectVersions": {},
+    "injectLabels": true
   }
 }

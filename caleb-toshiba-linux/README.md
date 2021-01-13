@@ -16,4 +16,9 @@ kubectl create secret generic minio \
 kubectl create secret generic cloudflare \
     --from-literal=email='caleb@doxsey.net' \
     --from-literal=api-key='???'
+
+# OpenDNS
+kubectl create secret generic opendns \
+    --from-literal=username='caleb@doxsey.net' \
+    --from-literal=password='???'
 ```
