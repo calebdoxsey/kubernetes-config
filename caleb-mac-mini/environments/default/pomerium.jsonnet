@@ -125,4 +125,55 @@ local PomeriumNodePortServce = function() {
   config: PomeriumConfigMap(),
   deployment: PomeriumDeployment(),
   service: PomeriumNodePortServce(),
+  redis: {
+    deployment: {
+      apiVersion: 'apps/v1',
+      kind: 'Deployment',
+      metadata: {
+        name: 'redis',
+      },
+      spec: {
+        selector: {
+          matchLabels: {
+            name: 'redis',
+          },
+        },
+        template: {
+          metadata: {
+            labels: {
+              name: 'redis',
+            },
+          },
+          spec: {
+            containers: [{
+              image: 'redis',
+              name: 'redis',
+            }],
+          },
+        },
+      },
+    },
+    nodePortService: {
+      apiVersion: 'v1',
+      kind: 'Service',
+      metadata: {
+        name: 'redis',
+        labels: {
+          name: 'redis',
+        },
+      },
+      spec: {
+        type: 'NodePort',
+        selector: {
+          name: 'redis',
+        },
+        ports: [{
+          name: 'redis',
+          port: 6379,
+          targetPort: 6379,
+          nodePort: 30022,
+        }],
+      },
+    },
+  },
 }
