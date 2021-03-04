@@ -187,6 +187,10 @@
                   name: 'minio-config',
                   mountPath: '/root/.minio',
                 },
+                {
+                  name: 'minio-data',
+                  mountPath: '/data',
+                },
               ],
             }],
             containers: [{
@@ -217,10 +221,16 @@
                   },
                 },
               ],
-              volumeMounts: [{
-                name: 'minio-config',
-                mountPath: '/root/.minio',
-              }],
+              volumeMounts: [
+                {
+                  name: 'minio-config',
+                  mountPath: '/root/.minio',
+                },
+                {
+                  name: 'minio-data',
+                  mountPath: '/data',
+                },
+              ],
             }],
             volumes: [
               {
@@ -232,6 +242,13 @@
               {
                 name: 'minio-config',
                 emptyDir: {},
+              },
+              {
+                name: 'minio-data',
+                hostPath: {
+                  path: '/media/audio',
+                  type: 'Directory',
+                },
               },
             ],
           },
