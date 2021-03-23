@@ -13,6 +13,17 @@ local PomeriumPolicy = function() std.flattenArrays(
         to: 'http://podcasts.default.svc.cluster.local',
         allowed_domains: 'pomerium.com',
       },
+      // tcp tunnels
+      {
+        from: 'tcp+https://tcp.' + rootDomain + ':22',
+        to: 'tcp://host.k3d.internal:22',
+        allowed_domains: 'pomerium.com',
+      },
+      {
+        from: 'tcp+https://tcp.' + rootDomain + ':5900',
+        to: 'tcp://host.k3d.internal:5900',
+        allowed_domains: 'pomerium.com',
+      },
     ],
   ]
 );
@@ -92,7 +103,13 @@ local PomeriumDeployment = function() {
             { name: 'https', containerPort: 443 },
             { name: 'grpc', containerPort: 5443 },
           ],
+          volumeMounts: [
+            { mountPath: '/data', name: 'pomerium-data' },
+          ],
         }],
+        volumes: [
+          { name: 'pomerium-data', hostPath: { path: '/data/pomerium', type: 'DirectoryOrCreate' } },
+        ],
       },
     },
   },

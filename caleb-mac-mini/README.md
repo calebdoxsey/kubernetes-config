@@ -8,7 +8,7 @@ k3d cluster create \
     --no-lb \
     --port '443:30443@server[0]' \
     --port '80:30080@server[0]' \
-    --volume 'data:/data'
+    --volume "$HOME/data:/data
 ```
 
 ## Secrets
