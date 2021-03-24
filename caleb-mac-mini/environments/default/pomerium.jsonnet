@@ -6,23 +6,28 @@ local PomeriumPolicy = function() std.flattenArrays(
       {
         from: 'https://verify.' + rootDomain,
         to: 'https://verify.pomerium.com',
-        allowed_domains: 'pomerium.com',
+        allowed_domains: ['doxsey.net', 'pomerium.com'],
       },
       {
         from: 'https://podcasts.' + rootDomain,
         to: 'http://podcasts.default.svc.cluster.local',
-        allowed_domains: 'pomerium.com',
+        allowed_domains: ['doxsey.net', 'pomerium.com'],
+      },
+      {
+        from: 'https://prometheus.' + rootDomain,
+        to: 'http://prometheus.default.svc.cluster.local',
+        allowed_domains: ['doxsey.net', 'pomerium.com'],
       },
       // tcp tunnels
       {
         from: 'tcp+https://tcp.' + rootDomain + ':22',
         to: 'tcp://host.k3d.internal:22',
-        allowed_domains: 'pomerium.com',
+        allowed_domains: ['doxsey.net', 'pomerium.com'],
       },
       {
         from: 'tcp+https://tcp.' + rootDomain + ':5900',
         to: 'tcp://host.k3d.internal:5900',
-        allowed_domains: 'pomerium.com',
+        allowed_domains: ['doxsey.net', 'pomerium.com'],
       },
     ],
   ]
@@ -43,6 +48,7 @@ local PomeriumConfigMap = function() {
     GRPC_ADDRESS: ':5443',
 
     AUTOCERT: 'true',
+    AUTOCERT_USE_STAGING: 'true',
 
     AUTHENTICATE_SERVICE_URL: 'https://authenticate.' + rootDomain,
     AUTHENTICATE_CALLBACK_PATH: '/oauth2/callback',
@@ -50,6 +56,8 @@ local PomeriumConfigMap = function() {
     DATABROKER_SERVICE_URL: 'http://localhost:5443',
 
     IDP_PROVIDER: 'google',
+
+    METRICS_ADDRESS: ':9902',
 
     POLICY: std.base64(std.manifestYamlDoc(PomeriumPolicy())),
   },
@@ -88,7 +96,7 @@ local PomeriumDeployment = function() {
       spec: {
         containers: [{
           name: 'pomerium',
-          image: 'pomerium/pomerium:master',
+          image: 'quay.io/calebdoxsey/pomerium:dev',
           imagePullPolicy: 'Always',
           envFrom: [
             { configMapRef: { name: 'pomerium' } },
@@ -102,6 +110,7 @@ local PomeriumDeployment = function() {
             { name: 'http', containerPort: 80 },
             { name: 'https', containerPort: 443 },
             { name: 'grpc', containerPort: 5443 },
+            { name: 'metrics', containerPort: 9902 },
           ],
           volumeMounts: [
             { mountPath: '/data', name: 'pomerium-data' },
@@ -115,7 +124,7 @@ local PomeriumDeployment = function() {
   },
 };
 
-local PomeriumNodePortServce = function() {
+local PomeriumNodePortService = function() {
   apiVersion: 'v1',
   kind: 'Service',
   metadata: {
@@ -138,10 +147,32 @@ local PomeriumNodePortServce = function() {
   },
 };
 
+local PomeriumMetricsService = function() {
+  apiVersion: 'v1',
+  kind: 'Service',
+  metadata: {
+    namespace: 'default',
+    name: 'pomerium-metrics',
+    labels: {
+      app: 'pomerium',
+      'app.kubernetes.io/part-of': 'pomerium',
+    },
+  },
+  spec: {
+    ports: [
+      { name: 'metrics', port: 80, protocol: 'TCP', targetPort: 'metrics' },
+    ],
+    selector: {
+      app: 'pomerium',
+    },
+  },
+};
+
 {
   config: PomeriumConfigMap(),
   deployment: PomeriumDeployment(),
-  service: PomeriumNodePortServce(),
+  service: PomeriumNodePortService(),
+  metrics: PomeriumMetricsService(),
   redis: {
     deployment: {
       apiVersion: 'apps/v1',
