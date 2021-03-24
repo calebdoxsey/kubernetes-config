@@ -6,23 +6,23 @@ local PomeriumPolicy = function() std.flattenArrays(
       {
         from: 'https://verify.' + rootDomain,
         to: 'https://verify.pomerium.com',
-        allowed_domains: 'pomerium.com',
+        allowed_domains: ['pomerium.com', 'doxsey.net'],
       },
       {
         from: 'https://podcasts.' + rootDomain,
         to: 'http://podcasts.default.svc.cluster.local',
-        allowed_domains: 'pomerium.com',
+        allowed_domains: ['pomerium.com', 'doxsey.net'],
       },
       // tcp tunnels
       {
         from: 'tcp+https://tcp.' + rootDomain + ':22',
         to: 'tcp://host.k3d.internal:22',
-        allowed_domains: 'pomerium.com',
+        allowed_domains: ['pomerium.com', 'doxsey.net'],
       },
       {
         from: 'tcp+https://tcp.' + rootDomain + ':5900',
         to: 'tcp://host.k3d.internal:5900',
-        allowed_domains: 'pomerium.com',
+        allowed_domains: ['pomerium.com', 'doxsey.net'],
       },
     ],
   ]
