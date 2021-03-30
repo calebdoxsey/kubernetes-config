@@ -66,12 +66,7 @@ local Deployment = function() {
           ],
         }],
         volumes: [
-          {
-            name: 'prometheus-config',
-            configMap: {
-              name: 'prometheus',
-            },
-          },
+          { name: 'prometheus-config', configMap: { name: 'prometheus' } },
         ],
       },
     },

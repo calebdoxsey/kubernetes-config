@@ -14,9 +14,20 @@ local PomeriumPolicy = function() std.flattenArrays(
         allowed_domains: ['doxsey.net', 'pomerium.com'],
       },
       {
+        from: 'https://pomerium-metrics.' + rootDomain,
+        to: 'http://pomerium-metrics.default.svc.cluster.local',
+        allowed_domains: ['doxsey.net', 'pomerium.com'],
+      },
+      {
         from: 'https://prometheus.' + rootDomain,
         to: 'http://prometheus.default.svc.cluster.local',
         allowed_domains: ['doxsey.net', 'pomerium.com'],
+      },
+      {
+        from: 'https://grafana.' + rootDomain,
+        to: 'http://grafana.default.svc.cluster.local',
+        allowed_domains: ['doxsey.net', 'pomerium.com'],
+        pass_identity_headers: true,
       },
       // tcp tunnels
       {
@@ -48,7 +59,6 @@ local PomeriumConfigMap = function() {
     GRPC_ADDRESS: ':5443',
 
     AUTOCERT: 'true',
-    AUTOCERT_USE_STAGING: 'true',
 
     AUTHENTICATE_SERVICE_URL: 'https://authenticate.' + rootDomain,
     AUTHENTICATE_CALLBACK_PATH: '/oauth2/callback',
@@ -56,6 +66,7 @@ local PomeriumConfigMap = function() {
     DATABROKER_SERVICE_URL: 'http://localhost:5443',
 
     IDP_PROVIDER: 'google',
+    JWT_CLAIMS_HEADERS: 'email',
 
     METRICS_ADDRESS: ':9902',
 
@@ -113,11 +124,13 @@ local PomeriumDeployment = function() {
             { name: 'metrics', containerPort: 9902 },
           ],
           volumeMounts: [
-            { mountPath: '/data', name: 'pomerium-data' },
+            { name: 'pomerium-data', mountPath: '/data' },
+            { name: 'pomerium-local-data', mountPath: '/root/.local/share/pomerium' },
           ],
         }],
         volumes: [
           { name: 'pomerium-data', hostPath: { path: '/data/pomerium', type: 'DirectoryOrCreate' } },
+          { name: 'pomerium-local-data', hostPath: { path: '/data/pomerium-local', type: 'DirectoryOrCreate' } },
         ],
       },
     },
@@ -173,55 +186,4 @@ local PomeriumMetricsService = function() {
   deployment: PomeriumDeployment(),
   service: PomeriumNodePortService(),
   metrics: PomeriumMetricsService(),
-  redis: {
-    deployment: {
-      apiVersion: 'apps/v1',
-      kind: 'Deployment',
-      metadata: {
-        name: 'redis',
-      },
-      spec: {
-        selector: {
-          matchLabels: {
-            name: 'redis',
-          },
-        },
-        template: {
-          metadata: {
-            labels: {
-              name: 'redis',
-            },
-          },
-          spec: {
-            containers: [{
-              image: 'redis',
-              name: 'redis',
-            }],
-          },
-        },
-      },
-    },
-    nodePortService: {
-      apiVersion: 'v1',
-      kind: 'Service',
-      metadata: {
-        name: 'redis',
-        labels: {
-          name: 'redis',
-        },
-      },
-      spec: {
-        type: 'NodePort',
-        selector: {
-          name: 'redis',
-        },
-        ports: [{
-          name: 'redis',
-          port: 6379,
-          targetPort: 6379,
-          nodePort: 30022,
-        }],
-      },
-    },
-  },
 }
