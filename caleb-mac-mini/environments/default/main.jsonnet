@@ -4,4 +4,5 @@
   prometheus: import 'prometheus.jsonnet',
   grafana: import 'grafana.jsonnet',
   redis: import 'redis.jsonnet',
+  kubernetesDashboard: import 'kubernetes-dashboard.jsonnet',
 }

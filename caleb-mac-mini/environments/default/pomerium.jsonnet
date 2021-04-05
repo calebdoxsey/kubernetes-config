@@ -4,6 +4,11 @@ local PomeriumPolicy = function() std.flattenArrays(
   [
     [
       {
+        from: 'https://kubernetes-dashboard.' + rootDomain,
+        to: 'https://kubernetes-dashboard.default.svc.cluster.local',
+        allowed_domains: ['doxsey.net', 'pomerium.com'],
+      },
+      {
         from: 'https://verify.' + rootDomain,
         to: 'https://verify.pomerium.com',
         allowed_domains: ['doxsey.net', 'pomerium.com'],
@@ -107,7 +112,7 @@ local PomeriumDeployment = function() {
       spec: {
         containers: [{
           name: 'pomerium',
-          image: 'quay.io/calebdoxsey/pomerium:dev',
+          image: 'pomerium/pomerium:v0.13.3',
           imagePullPolicy: 'Always',
           envFrom: [
             { configMapRef: { name: 'pomerium' } },
@@ -181,9 +186,96 @@ local PomeriumMetricsService = function() {
   },
 };
 
+local ServiceAccount = function() {
+  apiVersion: 'v1',
+  kind: 'ServiceAccount',
+  metadata: {
+    namespace: 'default',
+    name: 'pomerium',
+  },
+};
+
+local ClusterRole = function() {
+  apiVersion: 'rbac.authorization.k8s.io/v1',
+  kind: 'ClusterRole',
+  metadata: {
+    name: 'pomerium-impersonation',
+  },
+  rules: [
+    {
+      apiGroups: [
+        '',
+      ],
+      resources: [
+        'users',
+        'groups',
+        'serviceaccounts',
+      ],
+      verbs: [
+        'impersonate',
+      ],
+    },
+    {
+      apiGroups: [
+        'authorization.k8s.io',
+      ],
+      resources: [
+        'selfsubjectaccessreviews',
+      ],
+      verbs: [
+        'create',
+      ],
+    },
+  ],
+};
+
+local PomeriumClusterRoleBinding = function() {
+  apiVersion: 'rbac.authorization.k8s.io/v1',
+  kind: 'ClusterRoleBinding',
+  metadata: {
+    name: 'pomerium',
+  },
+  roleRef: {
+    apiGroup: 'rbac.authorization.k8s.io',
+    kind: 'ClusterRole',
+    name: 'pomerium-impersonation',
+  },
+  subjects: [
+    {
+      kind: 'ServiceAccount',
+      name: 'pomerium',
+      namespace: 'default',
+    },
+  ],
+};
+
+local ClusterRoleBinding = function() {
+  apiVersion: 'rbac.authorization.k8s.io/v1',
+  kind: 'ClusterRoleBinding',
+  metadata: {
+    name: 'cluster-admin-crb',
+  },
+  roleRef: {
+    apiGroup: 'rbac.authorization.k8s.io',
+    kind: 'ClusterRole',
+    name: 'cluster-admin',
+  },
+  subjects: [
+    {
+      apiGroup: 'rbac.authorization.k8s.io',
+      kind: 'Group',
+      name: 'admins',
+    },
+  ],
+};
+
 {
   config: PomeriumConfigMap(),
   deployment: PomeriumDeployment(),
   service: PomeriumNodePortService(),
   metrics: PomeriumMetricsService(),
+  serviceAccount: ServiceAccount(),
+  clusterRole: ClusterRole(),
+  pomeriumClusterRoleBinding: PomeriumClusterRoleBinding(),
+  clusterRoleBinding: ClusterRoleBinding(),
 }
