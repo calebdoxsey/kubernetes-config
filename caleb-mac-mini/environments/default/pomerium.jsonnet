@@ -34,6 +34,11 @@ local PomeriumPolicy = function() std.flattenArrays(
         allowed_domains: ['doxsey.net', 'pomerium.com'],
         pass_identity_headers: true,
       },
+      {
+        from: 'https://google-jwt-access-token.' + rootDomain,
+        to: 'http://google-jwt-access-token.default.svc.cluster.local',
+        allow_public_unauthenticated_access: true,
+      },
       // tcp tunnels
       {
         from: 'tcp+https://tcp.' + rootDomain + ':22',
