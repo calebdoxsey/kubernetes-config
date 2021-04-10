@@ -6,4 +6,5 @@
   redis: import 'redis.jsonnet',
   kubernetesDashboard: import 'kubernetes-dashboard.jsonnet',
   googleJWTAccessToken: import 'google-jwt-access-token.jsonnet',
+  minio: import 'minio.jsonnet',
 }

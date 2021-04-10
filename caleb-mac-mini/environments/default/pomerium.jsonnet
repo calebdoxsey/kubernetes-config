@@ -37,6 +37,11 @@ local PomeriumPolicy = function() std.flattenArrays(
       {
         from: 'https://google-jwt-access-token.' + rootDomain,
         to: 'http://google-jwt-access-token.default.svc.cluster.local',
+        allowed_domains: ['doxsey.net', 'pomerium.com'],
+      },
+      {
+        from: 'https://minio.' + rootDomain,
+        to: 'http://minio.default.svc.cluster.local',
         allow_public_unauthenticated_access: true,
       },
       // tcp tunnels
@@ -48,6 +53,11 @@ local PomeriumPolicy = function() std.flattenArrays(
       {
         from: 'tcp+https://tcp.' + rootDomain + ':5900',
         to: 'tcp://host.k3d.internal:5900',
+        allowed_domains: ['doxsey.net', 'pomerium.com'],
+      },
+      {
+        from: 'tcp+https://tcp.' + rootDomain + ':6379',
+        to: 'tcp://redis.default.svc.cluster.local:6379',
         allowed_domains: ['doxsey.net', 'pomerium.com'],
       },
     ],

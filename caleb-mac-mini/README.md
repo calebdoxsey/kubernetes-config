@@ -15,10 +15,16 @@ k3d cluster create \
 Part of the pomerium config is stored in a secret:
 
 ```bash
+# pomerium
 kubectl create secret generic pomerium \
     --from-literal="SHARED_SECRET=$(head -c32 /dev/urandom | base64)" \
     --from-literal="COOKIE_SECRET=$(head -c32 /dev/urandom | base64)" \
     --from-literal="IDP_CLIENT_ID=..." \
     --from-literal="IDP_CLIENT_SECRET=..." \
     --from-literal="IDP_SERVICE_ACCOUNT=..."
+
+# minio
+kubectl create secret generic minio \
+    --from-literal="MINIO_SECRET_KEY=?" \
+    --from-literal="MINIO_ROOT_PASSWORD=?"
 ```
