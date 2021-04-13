@@ -44,6 +44,13 @@ local PomeriumPolicy = function() std.flattenArrays(
         to: 'http://minio.default.svc.cluster.local',
         allow_public_unauthenticated_access: true,
       },
+      {
+        from: 'https://console.' + rootDomain,
+        to: 'http://pomerium-console.default.svc.cluster.local',
+        allowed_domains: ['doxsey.net', 'pomerium.com'],
+        pass_identity_headers: true,
+        allow_websockets: true,
+      },
       // tcp tunnels
       {
         from: 'tcp+https://tcp.' + rootDomain + ':22',
@@ -180,6 +187,36 @@ local PomeriumNodePortService = function() {
   },
 };
 
+local PomeriumService = function() {
+  apiVersion: 'v1',
+  kind: 'Service',
+  metadata: {
+    namespace: 'default',
+    name: 'pomerium',
+    labels: {
+      app: 'pomerium',
+      'app.kubernetes.io/part-of': 'pomerium',
+    },
+  },
+  spec: {
+    selector: {
+      app: 'pomerium',
+    },
+    ports: [
+      {
+        name: 'grpc',
+        port: 5443,
+        targetPort: 'grpc',
+      },
+      {
+        name: 'metrics',
+        port: 9902,
+        targetPort: 'metrics',
+      },
+    ],
+  },
+};
+
 local PomeriumMetricsService = function() {
   apiVersion: 'v1',
   kind: 'Service',
@@ -284,13 +321,103 @@ local ClusterRoleBinding = function() {
   ],
 };
 
+local PomeriumConsoleDeployment = function() {
+  apiVersion: 'apps/v1',
+  kind: 'Deployment',
+  metadata: {
+    namespace: 'default',
+    name: 'pomerium-console',
+    labels: {
+      app: 'pomerium-console',
+      'app.kubernetes.io/part-of': 'pomerium',
+    },
+  },
+  spec: {
+    replicas: 1,
+    selector: {
+      matchLabels: {
+        app: 'pomerium-console',
+      },
+    },
+    template: {
+      metadata: {
+        labels: {
+          app: 'pomerium-console',
+          'app.kubernetes.io/part-of': 'pomerium',
+        },
+      },
+      spec: {
+        containers: [{
+          name: 'pomerium-console',
+          image: 'k3d-registry.localhost.pomerium.io:5000/pomerium-console:master',
+          imagePullPolicy: 'Always',
+          args: [
+            'serve',
+            '--databroker-service-url=http://pomerium.default.svc.cluster.local:5443',
+            '--database-url=sqlite:/data/pomerium-console.sqlite3',
+            '--administrators=cdoxsey@pomerium.com,caleb@doxsey.net',
+          ],
+          ports: [
+            { name: 'http', containerPort: 8701 },
+            { name: 'grpc', containerPort: 8702 },
+          ],
+          envFrom: [
+            { secretRef: { name: 'pomerium' } },
+          ],
+          volumeMounts: [
+            { name: 'pomerium-console-data', mountPath: '/data' },
+          ],
+        }],
+        volumes: [
+          { name: 'pomerium-console-data', hostPath: { path: '/data/pomerium-console', type: 'DirectoryOrCreate' } },
+        ],
+      },
+    },
+  },
+};
+
+local PomeriumConsoleService = function() {
+  apiVersion: 'v1',
+  kind: 'Service',
+  metadata: {
+    namespace: 'default',
+    name: 'pomerium-console',
+    labels: {
+      app: 'pomerium-console',
+      'app.kubernetes.io/part-of': 'pomerium',
+    },
+  },
+  spec: {
+    selector: {
+      app: 'pomerium-console',
+    },
+    ports: [
+      {
+        name: 'http',
+        port: 80,
+        targetPort: 'http',
+      },
+      {
+        name: 'grpc',
+        port: 5080,
+        targetPort: 'grpc',
+      },
+    ],
+  },
+};
+
 {
   config: PomeriumConfigMap(),
   deployment: PomeriumDeployment(),
-  service: PomeriumNodePortService(),
+  nodePortService: PomeriumNodePortService(),
+  service: PomeriumService(),
   metrics: PomeriumMetricsService(),
   serviceAccount: ServiceAccount(),
   clusterRole: ClusterRole(),
   pomeriumClusterRoleBinding: PomeriumClusterRoleBinding(),
   clusterRoleBinding: ClusterRoleBinding(),
+  console: {
+    deployment: PomeriumConsoleDeployment(),
+    service: PomeriumConsoleService(),
+  },
 }
