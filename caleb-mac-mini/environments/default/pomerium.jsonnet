@@ -134,7 +134,7 @@ local PomeriumDeployment = function() {
       spec: {
         containers: [{
           name: 'pomerium',
-          image: 'pomerium/pomerium:v0.13.3',
+          image: 'calebdoxsey/pomerium:dev',
           imagePullPolicy: 'Always',
           envFrom: [
             { configMapRef: { name: 'pomerium' } },
