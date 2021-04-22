@@ -7,4 +7,5 @@
   kubernetesDashboard: import 'kubernetes-dashboard.jsonnet',
   googleJWTAccessToken: import 'google-jwt-access-token.jsonnet',
   minio: import 'minio.jsonnet',
+  mockIDPs: import 'mock-idps.jsonnet',
 }

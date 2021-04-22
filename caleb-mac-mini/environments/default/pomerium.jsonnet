@@ -51,6 +51,11 @@ local PomeriumPolicy = function() std.flattenArrays(
         pass_identity_headers: true,
         allow_websockets: true,
       },
+      {
+        from: 'https://mock-idp-ping.' + rootDomain,
+        to: 'http://mock-idp-ping.default.svc.cluster.local',
+        allow_public_unauthenticated_access: true,
+      },
       // tcp tunnels
       {
         from: 'tcp+https://tcp.' + rootDomain + ':22',
