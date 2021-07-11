@@ -44,6 +44,7 @@ local PomeriumPolicy = function() std.flattenArrays(
         to: 'http://minio.default.svc.cluster.local',
         allow_public_unauthenticated_access: true,
         preserve_host_header: true,
+        timeout: '1h',
       },
       {
         from: 'https://console.' + rootDomain,
